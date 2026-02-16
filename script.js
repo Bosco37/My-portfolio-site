@@ -1,31 +1,42 @@
 'use strict';
 
-//===================================
-// THEME TOGGLE
-//===================================
+if (typeof AOS !== 'undefined') {
+    AOS.init({
+        duration: 800,
+        easing: 'ease-in-out',
+        once: true,
+        mirror: false,
+        offset: 50
+    });
+}
+
 const themeToggle = document.getElementById('theme-toggle');
 
 function setTheme(theme) {
-    if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
-        localStorage.setItem('theme', 'dark');
-    } else {
+    if (theme === 'light') {
+        document.body.classList.add('light-mode');
         document.body.classList.remove('dark-mode');
         localStorage.setItem('theme', 'light');
+    } else {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
     }
 }
 
 const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'dark') {
+if (savedTheme === 'light') {
+    setTheme('light');
+} else {
     setTheme('dark');
 }
 
 if (themeToggle) {
     themeToggle.addEventListener('click', function() {
-        if (document.body.classList.contains('dark-mode')) {
-            setTheme('light');
-        } else {
+        if (document.body.classList.contains('light-mode')) {
             setTheme('dark');
+        } else {
+            setTheme('light');
         }
         this.style.transform = 'rotate(180deg)';
         setTimeout(() => {
@@ -34,37 +45,37 @@ if (themeToggle) {
     });
 }
 
-//===================================
-// SIDEBAR TOGGLE
-//===================================
 const sidebar = document.querySelector('[data-sidebar]');
 const sidebarBtn = document.querySelector('[data-sidebar-btn]');
 
 if (sidebarBtn && sidebar) {
     sidebarBtn.addEventListener('click', function() {
         sidebar.classList.toggle('active');
+        
+        const icon = this.querySelector('i');
+        if (icon) {
+            if (sidebar.classList.contains('active')) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0)';
+            }
+        }
     });
 }
 
-//===================================
-// PAGE NAVIGATION - FIXED
-//===================================
 const navigationLinks = document.querySelectorAll('[data-nav-link]');
 const pages = document.querySelectorAll('[data-page]');
 
 function switchPage(pageName) {
-    // Hide all pages
     pages.forEach(page => {
         page.classList.remove('active');
     });
     
-    // Show selected page
     const activePage = document.querySelector(`[data-page="${pageName}"]`);
     if (activePage) {
         activePage.classList.add('active');
     }
     
-    // Update active state on nav buttons
     navigationLinks.forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('data-nav-link') === pageName) {
@@ -72,11 +83,9 @@ function switchPage(pageName) {
         }
     });
     
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Add click event to all nav buttons
 if (navigationLinks.length > 0) {
     navigationLinks.forEach(link => {
         link.addEventListener('click', function(e) {
@@ -89,7 +98,6 @@ if (navigationLinks.length > 0) {
     });
 }
 
-// Set About page as active by default
 document.addEventListener('DOMContentLoaded', function() {
     const aboutPage = document.querySelector('[data-page="about"]');
     if (aboutPage) {
@@ -104,16 +112,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-//===================================
-// TYPING ANIMATION
-//===================================
 const typingElement = document.querySelector('.typing-text');
 if (typingElement) {
     const titles = [
         'CSE Student @ LPU',
-        'C++ Developer',
-        'Flask Enthusiast',
-        'Problem Solver'
+        'Time Management Enthusiast',
+        'Problem Solver',
+        'Tech Explorer'
     ];
     let titleIndex = 0;
     let charIndex = 0;
@@ -145,57 +150,118 @@ if (typingElement) {
     setTimeout(typeEffect, 1000);
 }
 
-//===================================
-// CONTACT FORM
-//===================================
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const submitBtn = this.querySelector('.submit-btn');
-        const originalText = submitBtn.innerHTML;
+        const originalText = submitBtn ? submitBtn.innerHTML : '';
         
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        submitBtn.disabled = true;
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            submitBtn.disabled = true;
+        }
         
         setTimeout(() => {
-            alert('✅ Message sent successfully! I will get back to you soon.');
+            const successMessage = document.createElement('div');
+            successMessage.className = 'success-message';
+            successMessage.innerHTML = '✅ Message sent successfully!';
+            successMessage.style.cssText = `
+                background: rgba(52, 211, 153, 0.1);
+                color: #34d399;
+                padding: 12px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                text-align: center;
+                border: 1px solid #34d399;
+            `;
+            
+            this.insertBefore(successMessage, this.firstChild);
+            
             this.reset();
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
+            
+            if (submitBtn) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+            
+            setTimeout(() => {
+                successMessage.remove();
+            }, 3000);
         }, 1500);
     });
 }
 
-//===================================
-// PROJECT LINK HANDLING
-//===================================
 const projectLinks = document.querySelectorAll('.project-link');
 projectLinks.forEach(link => {
     link.addEventListener('click', function(e) {
         if (this.getAttribute('href') === '#') {
             e.preventDefault();
-            alert('🔗 GitHub repository coming soon!');
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '🔗 GitHub repository coming soon!';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #a78bfa;
+                color: #000;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                font-weight: 600;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
         }
     });
 });
 
-//===================================
-// AOS INITIALIZATION
-//===================================
-if (typeof AOS !== 'undefined') {
-    AOS.init({
-        duration: 800,
-        easing: 'ease-in-out',
-        once: true,
-        mirror: false,
-        offset: 50
+const certificateLinks = document.querySelectorAll('.cert-card-link, .cert-compact-item');
+certificateLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+        if (this.getAttribute('href') === '#') {
+            e.preventDefault();
+            
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = '🔗 Certificate link will be added soon!';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #a78bfa;
+                color: #000;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                font-weight: 600;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
     });
-}
+});
 
-//===================================
-// MOBILE SIDEBAR
-//===================================
 if (navigationLinks.length > 0 && sidebar) {
     navigationLinks.forEach(link => {
         link.addEventListener('click', function() {
@@ -211,3 +277,29 @@ window.addEventListener('resize', function() {
         sidebar.classList.remove('active');
     }
 });
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
